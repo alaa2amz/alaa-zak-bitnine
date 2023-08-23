@@ -121,17 +121,42 @@ for(int i=0;i<anumber;i++,r++){
 	r->atime=time_palloc(&v,asize);
 	r->pointer=v;
 	/*r->dtime=time_pfree(v);*/
-	printf("%d size:%d time2alloc: %f pointer: %p\n",i+1,r->size,r->atime,r->pointer);
 }
 /* free them again */
 
 r=records;
 for(int i=0;i<anumber;i++,r++){
-if(r-pointer)r->dtime=time_pfree(r->pointer);
+if(r->pointer)r->dtime=time_pfree(r->pointer);
+else
+	r->dtime=0;
 }
 
 /*print and calculate statics */
+r=records;
+unsigned memmax=0,memmin=0,memavrg=0,memtotal=0;
+double alltavrg=0,detavrg=0,allttotal=0,dettotal=0;
+int failcount=0;
 
+for(int i=0;i<anumber;i++,r++){
+	allttotal += r->atime;
+	dettotal += r->dtime;
+	memtotal += r->size;
+	memmax= r->size > memmax ? r->size : memmax;
+	memmin= r->size < memmin ? r->size : memmin;
+	r->pointer? failcount : failcount++;
+	printf("%2d size:%6d pointer:%14p t_alloc:%f t_free:%f\n",i+1,r->size,r->pointer,r->atime,r->dtime);
+}
+memavrg=memtotal/anumber;
+alltavrg=allttotal/anumber;
+detavrg=dettotal/anumber;
+printf("avrg_alloc_time %f sec\n\
+	avrg_dealloc_time %f sec\n\
+	max_alloc %d bytes\n\
+	min_alloc %d bytes\n\
+	avr_alloc %d bytes\n\
+	total number %d\n\
+	fails %d\n",
+	alltavrg,detavrg,memmax,memmin,memavrg,anumber,failcount);
 
 
 return 0;
