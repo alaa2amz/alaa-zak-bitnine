@@ -8,24 +8,26 @@
 /*data*/
 
 char help_message[]=
-" ptest\n"
-" test bed for pool allocator\n"
-"  -p poolsize in bytes\n"
-"  -s size of allocations\n"
-"  -n number of allocations if not given it will run till it is filled\n"
-"  -r random size not exceeding max\n"
-"  -u unoredered deallocation\n"
-"------------------deffred-------------------------------\n"
-"  -c chaos unordered allocation and deallocation the programm\n"
-"     in that case shoiuld be run for a pacific time andrecord\n"
-"------------------deffred--------------------------------\n"
+" ptest: test bed pool memory manager allocator\n"
+"--------------------------options-------------------------------\n"
+"  -p [BYTES] poolsize in bytes. default 32MB\n"
+"  -s [BYTES] size of allocations default 5MB\n"
+"  -n [NUM] number of allocations default\n"
+"  -r [MAX_NUM] random size not exceeding max overiding -s\n"
+"  -u {TODO} unoredered allocation deallocation according to plan or scenario\n"
+"  -c {TODO} chaos unordered allocation and deallocation the programm\n"
+"     in that case shoiuld be run for a pacific time and record\n"
 "     statstics\n"
 "  -h help print this message\n"
-"     Alaa Zakariya 2023-08-23\n";
+"---------------------------------------------------------------\n"
+"     Alaa Zakariya 2023-08-23\n"
+"----------------------------------------------------------------\n";
 
-int poolsize=128*1024;
-int asize=1024; 	/*allocation size in bytes*/
-int anumber=130; 	/*allocations numbr  */
+
+/*---------------  DATA -----------------*/
+int poolsize=32*1024;
+int asize=5*1024; 	/*allocation size in bytes*/
+int anumber=10; 	/*allocations numbr  */
 int rand_max=0; 	/*maximum random size*/
 int unordered=0; 	/*ordered allocation and deallocation*/
 int chaos=0; 		/*unordere */
@@ -44,18 +46,21 @@ Record * records;
 
 char optstring[]="p:s:n:r:uc";
 
-/* functions */
+/*--------------- FUNCTIONS ----------------*/
 double time_palloc(void ** p,int bytes); /*return calculated time of allocation and
 					   pointe in args as pointer pointer*/
 double time_pfree(void *p); 		/*return time of freeing p pointer*/	
 
 
-
+/*-------------------- MAIN FUNCTION --------------*/
 int main(int argc,char* argv[]){
-if(argc ==1){/******/
+/*
+if(argc ==1){
 printf("%s\n",help_message);
 return 0;
 }
+*/
+
 	/*process args*/
 	while ((c = getopt (argc, argv, optstring)) != -1)
 		switch (c){
@@ -120,10 +125,9 @@ for(int i=0;i<anumber;i++,r++){
 	r->size=asize;
 	r->atime=time_palloc(&v,asize);
 	r->pointer=v;
-	/*r->dtime=time_pfree(v);*/
 }
-/* free them again */
 
+/* free them again */
 r=records;
 for(int i=0;i<anumber;i++,r++){
 if(r->pointer)r->dtime=time_pfree(r->pointer);
@@ -136,7 +140,6 @@ r=records;
 unsigned memmax=0,memmin=0,memavrg=0,memtotal=0;
 double alltavrg=0,detavrg=0,allttotal=0,dettotal=0;
 int failcount=0;
-
 for(int i=0;i<anumber;i++,r++){
 	allttotal += r->atime;
 	dettotal += r->dtime;
@@ -149,26 +152,25 @@ for(int i=0;i<anumber;i++,r++){
 memavrg=memtotal/anumber;
 alltavrg=allttotal/anumber;
 detavrg=dettotal/anumber;
-printf("avrg_alloc_time %f sec\n\
+printf("\tavrg_alloc_time %f sec\n\
 	avrg_dealloc_time %f sec\n\
 	max_alloc %d bytes\n\
 	min_alloc %d bytes\n\
 	avr_alloc %d bytes\n\
 	total number %d\n\
-	fails %d\n",
+	fails %d\n\
+	please run with -h option for help\n",
 	alltavrg,detavrg,memmax,memmin,memavrg,anumber,failcount);
 
 
 return 0;
 }	
-/*
-void * n;
-double test=time_palloc(&n,asize);
-printf("time: %f , pointer: %p",test,n);
 
-}
-*/
-
+/* abstracting allocating time
+ * in function returning time and passed
+ * pointer to pointer to set it to allocated
+ * void pointer
+ */
 double time_palloc(void ** p,int bytes){
 double time;
 clock_t start, end;
@@ -180,6 +182,7 @@ return time;
 }
 
 
+/*abstracting time to deallocate*/
 double time_pfree(void *p){
 double time;
 clock_t start, end;
